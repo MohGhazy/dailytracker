@@ -1,0 +1,15 @@
+<div class="mb-4">
+
+    <label class="block text-sm font-medium mb-1">
+        {{ label }}
+    </label>
+
+    {{ field }}
+
+    {% if field.errors %}
+        <p class="text-red-500 text-sm mt-1">
+            {{ field.errors.0 }}
+        </p>
+    {% endif %}
+
+</div>

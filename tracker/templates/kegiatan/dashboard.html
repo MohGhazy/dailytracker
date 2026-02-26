@@ -1,0 +1,262 @@
+{% extends 'base.html' %}
+{% block isi %}
+
+<!-- HERO -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10">
+
+ <div>
+  <h2 class="text-4xl font-black tracking-tight">
+  Selamat Datang {{ request.user.username }}
+  </h2>
+
+  <div class="flex items-center gap-4 mt-4">
+
+   <!-- Date Card -->
+   <div class="flex items-center gap-3 bg-white border border-slate-200 px-4 py-2 rounded-xl shadow-sm">
+
+     <span class="material-symbols-outlined text-primary">
+       calendar_today
+     </span>
+
+     <a href="?date={{ prev_date|date:'Y-m-d' }}"
+        class="text-slate-400 hover:text-black transition text-lg font-bold">
+       ‹
+     </a>
+
+     <p class="text-base font-semibold min-w-[110px] text-center">
+       {{ hari_ini|date:"d M Y" }}
+     </p>
+
+     <a href="?date={{ next_date|date:'Y-m-d' }}"
+        class="text-slate-400 hover:text-black transition text-lg font-bold">
+       ›
+     </a>
+
+   </div>
+
+   {% if hari_ini != today %}
+   <a href="{% url 'dashboard' %}"
+      class="text-sm px-4 py-2 rounded-lg bg-primary/10 text-primary font-semibold hover:bg-primary/20 transition">
+     Hari Ini
+   </a>
+   {% endif %}
+
+ </div>
+  
+ </div>
+
+ <button onclick="openModal()"
+ class="flex items-center gap-2 bg-primary text-white px-6 py-3 rounded-xl font-bold shadow-lg shadow-primary/20 transition-all active:scale-95">
+   <span class="material-symbols-outlined">add</span>
+   Add Activity
+ </button>
+
+</div>
+
+
+<!-- SUMMARY -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+
+ <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+  <p class="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-1">Selesai</p>
+  <p class="text-4xl font-black">{{ selesai }}</p>
+ </div>
+
+ <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+  <p class="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-1">Tersisa</p>
+  <p class="text-4xl font-black">{{ belum }}</p>
+ </div>
+
+ <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+  <p class="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-1">Konsistensi</p>
+  <p class="text-4xl font-black">{{ konsistensi }}%</p>
+ </div>
+
+</div>
+
+<!-- DAILY PROGRESS BAR -->
+<div class="mb-10">
+
+  <div class="flex justify-between text-sm font-semibold mb-2">
+    <span>Progress Hari Ini</span>
+    <span>{{ konsistensi }}%</span>
+  </div>
+
+  <div class="w-full bg-slate-200 rounded-full h-3 overflow-hidden">
+
+    <div class="h-full rounded-full transition-all duration-500
+      {% if konsistensi == 100 %}
+        bg-green-500
+      {% elif konsistensi >= 60 %}
+        bg-primary
+      {% elif konsistensi > 0 %}
+        bg-amber-500
+      {% else %}
+        bg-slate-300
+      {% endif %}"
+      style="width: {{ konsistensi }}%">
+    </div>
+
+  </div>
+
+</div>
+
+<!-- SCHEDULE -->
+<h3 class="text-lg font-bold mb-4">Jadwal Hari Ini</h3>
+<!-- QUICK FILTER -->
+<div class="flex gap-2 mb-4">
+
+  <a href="?date={{ hari_ini|date:'Y-m-d' }}&filter=all"
+     class="px-3 py-1 rounded-lg text-sm font-medium
+     {% if filter == 'all' %} bg-primary text-white {% else %} bg-slate-100 {% endif %}">
+    Semua
+  </a>
+
+  <a href="?date={{ hari_ini|date:'Y-m-d' }}&filter=done"
+     class="px-3 py-1 rounded-lg text-sm font-medium
+     {% if filter == 'done' %} bg-green-500 text-white {% else %} bg-slate-100 {% endif %}">
+    Selesai
+  </a>
+
+  <a href="?date={{ hari_ini|date:'Y-m-d' }}&filter=pending"
+     class="px-3 py-1 rounded-lg text-sm font-medium
+     {% if filter == 'pending' %} bg-amber-500 text-white {% else %} bg-slate-100 {% endif %}">
+    Ditunda
+  </a>
+
+</div>
+
+<div class="space-y-3">
+
+ {% for item in kegiatan %}
+ <div class="bg-white p-4 rounded-xl border border-slate-200 flex items-center justify-between">
+
+  <div>
+   <p class="font-bold">{{ item.judul }}</p>
+   <p class="text-sm text-slate-500">{{ item.waktu|time:"H:i" }} • {{ item.kategori }}</p>
+  </div>
+
+  <a href="{% url 'toggle_selesai' item.id %}"
+  class="size-6 rounded border flex items-center justify-center">
+
+  {% if item.selesai %}
+  ✔
+  {% else %}
+  ○
+  {% endif %}
+
+  </a>
+
+ </div>
+ {% empty %}
+ 
+ <div class="text-center py-6 text-slate-400">
+
+   {% if filter == 'done' %}
+     Belum ada kegiatan yang selesai.
+   {% elif filter == 'pending' %}
+     Tidak ada kegiatan yang ditunda.
+   {% else %}
+     Belum ada kegiatan pada hari ini.
+   {% endif %}
+
+ </div>
+ 
+ {% endfor %}
+
+ <!-- PAGINATION -->
+{% if page_obj.has_other_pages %}
+<div class="flex justify-center gap-2 mt-6">
+
+  {% if page_obj.has_previous %}
+  <a href="?date={{ hari_ini|date:'Y-m-d' }}&filter={{ filter }}&page={{ page_obj.previous_page_number }}"
+     class="px-3 py-1 bg-slate-100 rounded">
+     Prev
+  </a>
+  {% endif %}
+
+  <span class="px-3 py-1 text-sm">
+    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+  </span>
+
+  {% if page_obj.has_next %}
+  <a href="?date={{ hari_ini|date:'Y-m-d' }}&filter={{ filter }}&page={{ page_obj.next_page_number }}"
+     class="px-3 py-1 bg-slate-100 rounded">
+     Next
+  </a>
+  {% endif %}
+
+</div>
+{% endif %}
+
+</div>
+
+<!-- QUICK ADD MODAL -->
+<div id="quickModal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-50">
+
+  <div class="bg-white w-full max-w-md rounded-2xl p-6 shadow-xl relative">
+
+    <button onclick="closeModal()"
+      class="absolute top-3 right-3 text-slate-400 hover:text-black">
+      ✕
+    </button>
+
+    <h3 class="text-lg font-bold mb-4">Tambah Kegiatan</h3>
+
+    <form method="POST" action="{% url 'tambah_kegiatan' %}">
+      {% csrf_token %}
+
+      <div class="space-y-4">
+
+        <input type="text" name="judul"
+          placeholder="Judul kegiatan"
+          required
+          class="w-full border rounded-lg px-3 py-2">
+
+        <input type="time" name="waktu"
+          required
+          class="w-full border rounded-lg px-3 py-2">
+
+        <select name="kategori"
+          class="w-full border rounded-lg px-3 py-2">
+
+          {% for k in request.user.kategori_set.all %}
+            <option value="{{ k.id }}">{{ k.nama }}</option>
+          {% endfor %}
+
+        </select>
+
+        <input type="hidden" name="tanggal"
+          value="{{ hari_ini|date:'Y-m-d' }}">
+
+        <button type="submit"
+          class="w-full bg-primary text-white py-2 rounded-lg font-semibold">
+          Simpan
+        </button>
+
+      </div>
+
+    </form>
+
+  </div>
+
+</div>
+
+
+
+{% endblock %}
+
+
+{% block extra_js %}
+<script>
+function openModal() {
+  document.getElementById('quickModal').classList.remove('hidden');
+  document.getElementById('quickModal').classList.add('flex');
+}
+
+function closeModal() {
+  document.getElementById('quickModal').classList.remove('flex');
+  document.getElementById('quickModal').classList.add('hidden');
+}
+</script>
+{% endblock extra_js %}

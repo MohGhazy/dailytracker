@@ -1,0 +1,154 @@
+{% extends 'base.html' %}
+
+{% block isi %}
+
+<!-- HEADER -->
+<div class="flex items-center justify-between mb-8">
+
+    <div>
+        <h1 class="text-2xl font-semibold tracking-tight">
+            Semua Kegiatan
+        </h1>
+        <p class="text-sm text-slate-500 mt-1">
+            Kelola semua aktivitas kamu di sini
+        </p>
+    </div>
+
+</div>
+
+
+<!-- FILTER -->
+<div class="flex flex-wrap gap-2 mb-6 text-sm">
+
+    <a href="{% url 'semua_kegiatan' %}"
+       class="px-4 py-2 rounded-lg border border-slate-300 hover:bg-slate-100">
+        Semua
+    </a>
+
+    <a href="?filter=today"
+       class="px-4 py-2 rounded-lg border border-slate-300 hover:bg-slate-100">
+        Hari ini
+    </a>
+
+    <a href="?filter=week"
+       class="px-4 py-2 rounded-lg border border-slate-300 hover:bg-slate-100">
+        Minggu ini
+    </a>
+
+    <a href="?filter=done"
+       class="px-4 py-2 rounded-lg border border-slate-300 hover:bg-slate-100">
+        Selesai
+    </a>
+
+    <a href="?filter=pending"
+       class="px-4 py-2 rounded-lg border border-slate-300 hover:bg-slate-100">
+        Belum
+    </a>
+
+</div>
+
+
+<!-- LIST KEGIATAN -->
+<div class="space-y-3">
+
+{% for k in kegiatan %}
+
+<div class="bg-white border border-slate-200 rounded-xl p-5 
+            flex items-center justify-between
+            hover:shadow-sm transition">
+
+    <!-- LEFT -->
+    <div>
+
+        <!-- JUDUL -->
+        <p class="font-semibold text-lg">
+            {{ k.judul }}
+        </p>
+
+        <!-- TANGGAL -->
+        <p class="text-sm text-slate-400 mt-1">
+            {{ k.tanggal|date:"d M Y" }} • {{ k.waktu|time:"H:i" }}
+        </p>
+
+        <!-- BADGE ROW -->
+        <div class="flex items-center gap-2 mt-3 text-sm">
+
+            <!-- BADGE KATEGORI -->
+            {% with kategori=k.kategori|lower %}
+            <span class="text-[11px] font-semibold px-2.5 py-1 rounded-full uppercase tracking-tight
+
+            {% if 'work' in kategori %}
+                bg-blue-100 text-blue-600
+
+            {% elif 'study' in kategori or 'design' in kategori %}
+                bg-purple-100 text-purple-600
+
+            {% elif 'health' in kategori or 'gym' in kategori %}
+                bg-emerald-100 text-emerald-600
+
+            {% elif 'learning' in kategori or 'read' in kategori %}
+                bg-orange-100 text-orange-600
+
+            {% elif 'admin' in kategori %}
+                bg-slate-200 text-slate-600
+
+            {% else %}
+                bg-slate-100 text-slate-500
+
+            {% endif %}
+            ">
+                {{ k.kategori }}
+            </span>
+            {% endwith %}
+
+            <!-- BADGE STATUS -->
+            {% if k.selesai %}
+                <span class="text-[11px] font-semibold px-2.5 py-1 rounded-full
+                             bg-green-100 text-green-600">
+                    ✔ Selesai
+                </span>
+            {% else %}
+                <span class="text-[11px] font-semibold px-2.5 py-1 rounded-full
+                             bg-amber-100 text-amber-600">
+                    ⏳ Belum
+                </span>
+            {% endif %}
+
+        </div>
+
+    </div>
+
+
+    <!-- RIGHT ACTIONS -->
+    <div class="flex items-center gap-2 text-sm">
+
+        <!-- EDIT -->
+        <a href="{% url 'edit_kegiatan' k.id %}"
+           class="px-3 py-2 rounded-lg border border-blue-300
+                  text-blue-600 hover:bg-blue-50 transition">
+            Edit
+        </a>
+
+        <!-- DELETE -->
+        <a href="{% url 'hapus_kegiatan' k.id %}"
+           onclick="return confirm('Hapus kegiatan ini?')"
+           class="px-3 py-2 rounded-lg border border-red-300
+                  text-red-600 hover:bg-red-50 transition">
+            Hapus
+        </a>
+
+    </div>
+
+</div>
+
+{% empty %}
+
+<div class="text-center py-12 text-slate-400">
+    Belum ada kegiatan.
+</div>
+
+{% endfor %}
+
+</div>
+
+{% endblock %}

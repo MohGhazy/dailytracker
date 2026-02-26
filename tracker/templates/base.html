@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+<title>DailyTrack</title>
+
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+
+<script>
+tailwind.config = {
+    darkMode: "class",
+    theme: {
+        extend: {
+            colors: {
+                primary: "#2513ec",
+                "background-light": "#f6f6f8",
+                "background-dark": "#121022",
+            },
+            fontFamily: {
+                display: ["Inter", "sans-serif"]
+            }
+        }
+    }
+}
+</script>
+
+<style>
+body { font-family: 'Inter', sans-serif; }
+</style>
+
+</head>
+
+<body class="bg-background-light text-slate-900 min-h-screen font-display">
+
+<!-- ================= NAVBAR ================= -->
+<header class="sticky top-0 z-50 w-full bg-white/80 backdrop-blur-md border-b border-slate-200">
+    <div class="max-w-7xl mx-auto px-6 h-16 grid grid-cols-3 items-center">
+
+        <!-- LEFT : LOGO -->
+        <div class="flex items-center">
+            <a href="{% url 'dashboard' %}" class="text-xl font-bold tracking-tight">
+                DailyTrack
+            </a>
+        </div>
+
+
+        {% if user.is_authenticated %}
+
+        <!-- CENTER : NAV -->
+        <nav class="hidden md:flex justify-center gap-8 text-sm font-medium">
+
+            {% url 'dashboard' as dashboard_url %}
+            <a href="{{ dashboard_url }}"
+            class="pb-4 border-b-2 transition-colors
+            {% if request.path == dashboard_url or request.path == '/' %}
+                text-primary border-primary
+            {% else %}
+                text-slate-500 border-transparent hover:text-slate-900
+            {% endif %}">
+            Beranda
+            </a>
+
+            {% url 'semua_kegiatan' as kegiatan_url %}
+            <a href="{{ kegiatan_url }}"
+            class="pb-4 border-b-2 transition-colors
+            {% if 'kegiatan' in request.path %}
+                text-primary border-primary
+            {% else %}
+                text-slate-500 border-transparent hover:text-slate-900
+            {% endif %}">
+            Aktivitas
+            </a>
+
+            {% url 'analytics' as analytics_url %}
+            <a href="{{ analytics_url }}"
+            class="pb-4 border-b-2 transition-colors
+            {% if 'analytics' in request.path %}
+                text-primary border-primary
+            {% else %}
+                text-slate-500 border-transparent hover:text-slate-900
+            {% endif %}">
+            Statistik
+            </a>
+
+            <a href="{% url 'profile' %}"
+            class="pb-4 border-b-2 transition-colors
+            {% if 'profile' in request.path %}
+                text-primary border-primary
+            {% else %}
+                text-slate-500 border-transparent hover:text-slate-900
+            {% endif %}">
+            Profil
+            </a>
+
+        </nav>
+
+
+        <!-- RIGHT : USER -->
+        <div class="flex items-center justify-end gap-4">
+
+            <!-- NOTIF -->
+            <button class="p-2 text-slate-500 hover:bg-slate-100 rounded-full transition-colors">
+                <span class="material-symbols-outlined">notifications</span>
+            </button>
+
+            <!-- DIVIDER -->
+            <div class="h-8 w-px bg-slate-200"></div>
+
+            <!-- USER INFO -->
+            <div class="flex items-center gap-3">
+
+                <div class="text-right hidden sm:block leading-tight">
+                    <p class="text-sm font-semibold text-slate-900">
+                        {{ request.user.username }}
+                    </p>
+                    {% if request.user.email %}
+                    <p class="text-[11px] text-slate-500 tracking-wide">
+                        {{ request.user.email }}
+                    </p>
+                    {% endif %}
+                </div>
+
+                <div class="relative">
+                    <img class="size-10 rounded-full object-cover ring-2 ring-transparent hover:ring-primary/20 transition-all"
+                        src="https://ui-avatars.com/api/?name={{ request.user.username }}&background=EEF2FF&color=3730A3"
+                        alt="avatar">
+
+                    <div class="absolute bottom-0 right-0 size-3 bg-green-500 border-2 border-white rounded-full"></div>
+                </div>
+
+                <form action="{% url 'logout' %}" method="post">
+                    {% csrf_token %}
+                    <button class="text-sm px-3 py-2 rounded-lg text-red-600 hover:bg-red-50 transition">
+                        Logout
+                    </button>
+                </form>
+
+            </div>
+
+        </div>
+
+        {% else %}
+        <div></div><div></div>
+        {% endif %}
+
+    </div>
+</header>
+
+<!-- ================= CONTENT ================= -->
+<main class="max-w-7xl mx-auto px-6 py-8">
+
+    {% block isi %}
+    {% endblock %}
+
+</main>
+
+
+<!-- ================= FOOTER ================= -->
+<footer class="max-w-7xl mx-auto px-6 py-12 mt-12 border-t border-slate-200 flex flex-col md:flex-row justify-between items-center gap-6">
+
+<div class="flex items-center gap-2">
+    <span class="text-sm font-bold text-slate-400 uppercase tracking-widest">
+    DailyTrack Website
+    </span>
+</div>
+
+<div class="flex gap-8">
+<a class="text-sm text-slate-500 hover:text-primary transition-colors font-medium" href="#">Privacy</a>
+<a class="text-sm text-slate-500 hover:text-primary transition-colors font-medium" href="#">Terms</a>
+<a class="text-sm text-slate-500 hover:text-primary transition-colors font-medium" href="#">Support</a>
+</div>
+
+<p class="text-sm text-slate-400">
+© 2026 DailyTrack
+</p>
+
+</footer>
+
+{% block extra_js %}{% endblock %}
+
+</body>
+</html>
