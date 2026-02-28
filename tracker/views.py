@@ -1,7 +1,7 @@
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.auth.decorators import login_required
 from datetime import date, datetime, timedelta
-
+from django.views.decorators.http import require_POST
 from django.urls import reverse
 from .models import Kategori, Kegiatan
 from .forms import FormKegiatan, FormUser
@@ -120,6 +120,41 @@ def dashboard(request):
     }
 
     return render(request, 'kegiatan/dashboard.html', context)
+  
+@login_required(login_url='login')
+def dashboard_total_kegiatan(request):
+
+    date_param = request.GET.get("date")
+    today = date.today()
+
+    try:
+        selected_date = (
+            datetime.strptime(date_param, "%Y-%m-%d").date()
+            if date_param else today
+        )
+    except ValueError:
+        selected_date = today
+
+    base_qs = Kegiatan.objects.filter(
+        pengguna=request.user,
+        tanggal=selected_date
+    )
+
+    total = base_qs.count()
+    selesai = base_qs.filter(selesai=True).count()
+    belum = total - selesai
+    konsistensi = hitung_konsistensi(total, selesai)
+
+    return render(
+        request,
+        "kegiatan/partials/total_kegiatan.html",
+        {
+            "total": total,
+            "selesai": selesai,
+            "belum": belum,
+            "konsistensi": konsistensi,
+        }
+    )
 
 @login_required(login_url='login')
 def semua_kegiatan(request):
@@ -160,7 +195,6 @@ def tambah_kegiatan(request):
             data = form.save(commit=False)
             data.pengguna = request.user
 
-            # Ambil tanggal dari POST (modal)
             tanggal_post = request.POST.get('tanggal')
             if tanggal_post:
                 data.tanggal = tanggal_post
@@ -216,12 +250,45 @@ def hapus_kegiatan(request, id):
   kegiatan.delete()
   return redirect('semua_kegiatan')
 
+@require_POST
 @login_required(login_url='login')
 def toggle_selesai(request, id):
- kegiatan = get_object_or_404(Kegiatan, id=id, pengguna=request.user)
- kegiatan.selesai = not kegiatan.selesai
- kegiatan.save()
- return redirect('dashboard')
+
+    kegiatan = get_object_or_404(
+        Kegiatan,
+        id=id,
+        pengguna=request.user
+    )
+
+    kegiatan.selesai = not kegiatan.selesai
+    kegiatan.save()
+
+    if request.headers.get("HX-Request"):
+
+        # hitung ulang summary hari ini
+        selected_date = kegiatan.tanggal
+
+        base_qs = Kegiatan.objects.filter(
+            pengguna=request.user,
+            tanggal=selected_date
+        )
+
+        total = base_qs.count()
+        selesai = base_qs.filter(selesai=True).count()
+        belum = total - selesai
+        konsistensi = hitung_konsistensi(total, selesai)
+
+        response = render(
+            request,
+            "kegiatan/partials/task_item.html",
+            {"item": kegiatan}
+        )
+
+        response["HX-Trigger"] = "summaryUpdated"
+
+        return response
+
+    return redirect("dashboard")
 
 def hitung_konsistensi(total, selesai):
   if total == 0:

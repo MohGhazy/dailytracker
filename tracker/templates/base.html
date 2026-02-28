@@ -11,24 +11,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
 
-<script>
-tailwind.config = {
-    darkMode: "class",
-    theme: {
-        extend: {
-            colors: {
-                primary: "#2513ec",
-                "background-light": "#f6f6f8",
-                "background-dark": "#121022",
-            },
-            fontFamily: {
-                display: ["Inter", "sans-serif"]
-            }
-        }
-    }
-}
-</script>
-
 <style>
 body { font-family: 'Inter', sans-serif; }
 </style>
@@ -183,5 +165,27 @@ body { font-family: 'Inter', sans-serif; }
 
 {% block extra_js %}{% endblock %}
 
+<script src="https://unpkg.com/htmx.org@1.9.12"></script>
+<script>
+tailwind.config = {
+    darkMode: "class",
+    theme: {
+        extend: {
+            colors: {
+                primary: "#2513ec",
+                "background-light": "#f6f6f8",
+                "background-dark": "#121022",
+            },
+            fontFamily: {
+                display: ["Inter", "sans-serif"]
+            }
+        }
+    }
+}
+
+document.body.addEventListener('htmx:configRequest', function (event) {
+  event.detail.headers['X-CSRFToken'] = '{{ csrf_token }}';
+});
+</script>
 </body>
 </html>

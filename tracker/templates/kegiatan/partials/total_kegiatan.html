@@ -1,0 +1,68 @@
+<div>
+
+  <!-- ================= SUMMARY CARDS ================= -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+
+    <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+      <p class="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-1">
+        Selesai
+      </p>
+      <p class="text-4xl font-black">
+        {{ selesai|default:0 }}
+      </p>
+    </div>
+
+    <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+      <p class="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-1">
+        Tersisa
+      </p>
+      <p class="text-4xl font-black">
+        {{ belum|default:0 }}
+      </p>
+    </div>
+
+    <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+      <p class="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-1">
+        Konsistensi
+      </p>
+      <p class="text-4xl font-black">
+        {{ konsistensi|default:0 }}%
+      </p>
+    </div>
+
+  </div>
+
+
+  <!-- ================= PROGRESS BAR ================= -->
+  <div class="mb-8">
+
+    <div class="flex justify-between text-sm font-semibold mb-2">
+      <span>Progress Hari Ini</span>
+      <span>{{ konsistensi|default:0 }}%</span>
+    </div>
+
+    <div class="w-full bg-slate-200 rounded-full h-3 overflow-hidden">
+
+      <div class="h-full rounded-full transition-all duration-500
+        {% if konsistensi == 100 %}bg-green-500
+        {% elif konsistensi >= 60 %}bg-primary
+        {% elif konsistensi > 0 %}bg-amber-500
+        {% else %}bg-slate-300
+        {% endif %}"
+        style="width: {{ konsistensi|default:0 }}%;">
+      </div>
+
+      <div class="h-full rounded-full transition-all duration-500
+        {% if konsistensi == 100 %}bg-green-500
+        {% elif konsistensi >= 60 %}bg-primary
+        {% elif konsistensi > 0 %}bg-amber-500
+        {% else %}bg-slate-300
+        {% endif %}"
+        style="width: {{ konsistensi|default:0 }}%;">
+      </div>
+
+    </div>
+
+  </div>
+
+</div>

@@ -1,0 +1,25 @@
+<div id="task-{{ item.id }}"
+     class="bg-white p-4 rounded-xl border border-slate-200 flex items-center justify-between">
+
+  <div>
+    <p class="font-bold">{{ item.judul }}</p>
+    <p class="text-sm text-slate-500">
+      {{ item.waktu|time:"H:i" }} • {{ item.kategori }}
+    </p>
+  </div>
+
+  <button
+    hx-post="{% url 'toggle_selesai' item.id %}"
+    hx-target="#task-{{ item.id }}"
+    hx-swap="outerHTML"
+    class="size-6 rounded border flex items-center justify-center">
+
+    {% if item.selesai %}
+      ✔
+    {% else %}
+      ○
+    {% endif %}
+
+  </button>
+
+</div>
