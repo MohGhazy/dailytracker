@@ -129,13 +129,69 @@
 
 </div>
 
+<!-- ================= QUICK ADD MODAL ================= -->
+
+<div id="quickModal"
+     class="fixed inset-0 bg-black/40 hidden items-center justify-center z-50">
+
+  <div class="bg-white w-full max-w-md rounded-2xl p-6 shadow-xl relative">
+
+    <button onclick="closeModal()"
+            class="absolute top-3 right-3 text-slate-400 hover:text-black">
+      ✕
+    </button>
+
+    <h3 class="text-lg font-bold mb-4">Tambah Kegiatan</h3>
+
+    <form method="POST" action="{% url 'tambah_kegiatan' %}">
+      {% csrf_token %}
+
+      <div class="space-y-4">
+
+        <input type="text" name="judul"
+               placeholder="Judul kegiatan"
+               required
+               class="w-full border rounded-lg px-3 py-2">
+
+        <input type="time" name="waktu"
+               required
+               class="w-full border rounded-lg px-3 py-2">
+
+        <select name="kategori"
+                class="w-full border rounded-lg px-3 py-2">
+
+          {% for k in request.user.kategori_set.all %}
+            <option value="{{ k.id }}">{{ k.nama }}</option>
+          {% endfor %}
+
+        </select>
+
+        <input type="hidden" name="tanggal"
+               value="{{ hari_ini|date:'Y-m-d' }}">
+
+        <button type="submit"
+                class="w-full bg-primary text-white py-2 rounded-lg font-semibold">
+          Simpan
+        </button>
+
+      </div>
+
+    </form>
+
+  </div>
+
+</div>
+
 {% endblock %}
 
 {% block extra_js %}
 <script>
 function openModal() {
-  document.getElementById('quickModal').classList.remove('hidden');
-  document.getElementById('quickModal').classList.add('flex');
+  const modal = document.getElementById('quickModal');
+  if (modal) {
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+  }
 }
 
 function closeModal() {
