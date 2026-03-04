@@ -4,20 +4,29 @@ from django.views.decorators.http import require_POST
 from django.urls import reverse
 from tracker.models import Kegiatan
 from tracker.forms import FormKegiatan
-from tracker.services.kegiatan_service import get_filtered_kegiatan, toggle_kegiatan_status, create_kegiatan, update_kegiatan, delete_kegiatan
+from tracker.services.kegiatan_service import get_filtered_kegiatan, toggle_kegiatan_status, create_kegiatan, update_kegiatan, delete_kegiatan, get_kegiatan
+from django.core.paginator import Paginator
 
 @login_required(login_url='login')
 def semua_kegiatan(request):
     filter_type = request.GET.get('filter', 'all')
+    search_query = request.GET.get("q", "")
 
     kegiatan = get_filtered_kegiatan(
         user=request.user,
-        filter_type=filter_type
+        filter_type=filter_type,
+        search_query=search_query,
     )
 
+    page_number = request.GET.get("page")
+    paginator = Paginator(kegiatan, 5)
+    page_obj = paginator.get_page(page_number)
+    
     return render(request, 'kegiatan/semua.html', {
-        'kegiatan': kegiatan,
-        'filter': filter_type
+        'page_obj': page_obj,
+        'paginator': paginator,
+        'filter': filter_type,
+        'search_query': search_query,
     })
 
 @login_required(login_url='login')
@@ -42,11 +51,7 @@ def tambah_kegiatan(request):
 @login_required(login_url='login')
 def edit_kegiatan(request, id):
 
-    kegiatan = get_object_or_404(
-        Kegiatan,
-        id=id,
-        pengguna=request.user
-    )
+    kegiatan = get_kegiatan(request.user, id)
 
     if request.method == 'POST':
         form = FormKegiatan(
@@ -56,7 +61,7 @@ def edit_kegiatan(request, id):
         )
 
         if form.is_valid():
-            update_kegiatan(request.user, id, form)
+            update_kegiatan(kegiatan, form)
             return redirect('semua_kegiatan')
     else:
         form = FormKegiatan(

@@ -3,12 +3,15 @@ from tracker.models import Kegiatan
 from django.shortcuts import get_object_or_404
 from django.core.cache import cache
 
-def get_filtered_kegiatan(user, filter_type="all"):
+def get_filtered_kegiatan(user, filter_type="all", search_query=None):
  kegiatan = (
   Kegiatan.objects
   .filter(pengguna=user)
   .select_related('kategori')
  )
+ 
+ if search_query:
+  kegiatan = kegiatan.filter(judul__icontains=search_query)
 
  today = date.today()
 
@@ -27,6 +30,13 @@ def get_filtered_kegiatan(user, filter_type="all"):
   kegiatan = kegiatan.filter(selesai=False)
 
  return kegiatan.order_by('-tanggal', '-waktu')
+
+def get_kegiatan(user, kegiatan_id):
+ return get_object_or_404(
+  Kegiatan,
+  id=kegiatan_id,
+  pengguna=user
+ )
 
 def toggle_kegiatan_status(user, kegiatan_id):
  kegiatan = get_object_or_404(
@@ -51,16 +61,10 @@ def create_kegiatan(user, form):
 
  return kegiatan
 
-def update_kegiatan(user, kegiatan_id, form):
- kegiatan = get_object_or_404(
-  Kegiatan,
-  id=kegiatan_id,
-  pengguna=user
- )
- 
+def update_kegiatan(kegiatan, form):
  updated = form.save()
  
- _invalidate_user_analytics_cache(user.id)
+ _invalidate_user_analytics_cache(kegiatan.pengguna.id)
  
  return updated
 

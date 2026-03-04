@@ -67,7 +67,7 @@ def build_analytics_data(user, range_type):
     ).order_by("-total")
 
     # ================= WEEK =================
-    week_labels = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun']
+    week_labels = ['Senin','Selasa','Rabu','Kamis','Jumat','Sabtu','Minggu']
     week_data = OrderedDict({d: 0 for d in week_labels})
 
     if range_type == "week":
@@ -76,13 +76,13 @@ def build_analytics_data(user, range_type):
         ).values('weekday').annotate(count=Count('id'))
      
         weekday_map = {
-        1: 'Mon',
-        2: 'Tue',
-        3: 'Wed',
-        4: 'Thu',
-        5: 'Fri',
-        6: 'Sat',
-        7: 'Sun'
+        1: 'Senin',
+        2: 'Selasa',
+        3: 'Rabu',
+        4: 'Kamis',
+        5: 'Jumat',
+        6: 'Sabtu',
+        7: 'Minggu'
         }
 
         for item in week_qs:
@@ -167,6 +167,8 @@ def build_analytics_data(user, range_type):
         max_value = 0
 
     y_max, step_size = hitung_scale(max_value)
+    
+    complation_rate = get_completion_rate(user)
 
     result = {
         "range": range_type,
@@ -186,8 +188,19 @@ def build_analytics_data(user, range_type):
         "all_values": all_values,
         "chart_step": step_size,
         "chart_max": y_max,
+        "completion_rate": complation_rate
     }
     
     cache.set(cache_key, result, 300)
     
     return result
+
+def get_completion_rate(user):
+    total = Kegiatan.objects.filter(pengguna=user).count()
+    
+    if total == 0:
+        return 0
+    
+    completed = Kegiatan.objects.filter(pengguna=user, selesai=True).count()
+    
+    return round((completed / total) * 100)
