@@ -22,6 +22,13 @@ def dashboard(request):
         filtered_qs = filtered_qs.filter(selesai=True)
     elif filter_param == "pending":
         filtered_qs = filtered_qs.filter(selesai=False)
+        
+    if filter_param == "done":
+        empty_message = "Belum ada kegiatan yang selesai hari ini."
+    elif filter_param == "pending":
+        empty_message = "Belum ada kegiatan yang ditunda hari ini."
+    else:
+        empty_message = "Belum ada kegiatan hari ini."
 
     paginator = Paginator(filtered_qs, 10)
     page_obj = paginator.get_page(request.GET.get("page"))
@@ -33,6 +40,7 @@ def dashboard(request):
         "page_obj": page_obj,
         "filter": filter_param,
         "hari_ini": selected_date,
+        "empty_message": empty_message,
         **summary,
         **nav,
     }

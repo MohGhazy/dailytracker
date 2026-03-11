@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth import update_session_auth_hash
 from tracker.models import Kategori
-from tracker.forms import FormUser
+from tracker.forms import CustomPasswordChangeForm, FormUser
 
 @login_required(login_url='login')
 def profile(request):
@@ -12,7 +12,7 @@ def profile(request):
     edit_id = request.GET.get('edit')
 
     form_user = FormUser(instance=request.user)
-    form_password = PasswordChangeForm(request.user)
+    form_password = CustomPasswordChangeForm(request.user)
 
     if request.method == 'POST':
 
@@ -23,7 +23,7 @@ def profile(request):
                 return redirect('profile')
 
         elif 'update_password' in request.POST:
-            form_password = PasswordChangeForm(request.user, request.POST)
+            form_password = CustomPasswordChangeForm(request.user, request.POST)
             if form_password.is_valid():
                 user = form_password.save()
                 update_session_auth_hash(request, user)

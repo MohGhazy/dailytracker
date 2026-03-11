@@ -1,7 +1,7 @@
 from datetime import date, timedelta
 from calendar import monthrange
 from collections import OrderedDict
-from django.db.models import Count, Q
+from django.db.models import Count, Q, Max, Min
 from tracker.models import Kegiatan
 from .utils import hitung_konsistensi, hitung_scale
 from django.db.models.functions import ExtractWeekDay, ExtractDay, ExtractMonth, ExtractYear
@@ -21,13 +21,67 @@ def get_period_range(user, range_type):
         end = today.replace(day=last_day)
 
     else:
-        first = semua.order_by("tanggal").first()
-        last = semua.order_by("-tanggal").first()
-        start = first.tanggal if first else today
-        end = last.tanggal if last else today
+        range_data = semua.aggregate(
+            first_date = Min("tanggal"),
+            last_date = Max("tanggal")
+        )
+        start = range_data["first_date"] or today
+        end = range_data["last_date"] or today
 
     return start, end
 
+def hitung_streak(user):
+    today = date.today()
+    
+    tanggal_selesai = (
+        Kegiatan.objects.filter(
+           pengguna = user,
+           selesai = True, 
+           tanggal__lte = date.today()
+        )
+        .values_list("tanggal", flat=True)
+        .distinct()
+        .order_by("-tanggal")
+    )
+    
+    streak = 0
+    current_day = today
+    
+    for tgl in tanggal_selesai:
+        if tgl == current_day:
+            streak += 1
+            current_day = current_day - timedelta(days=1)
+        elif tgl < current_day:
+            break
+    return streak
+
+def hitung_longest_streak(user):
+    tanggal_selesai = (
+        Kegiatan.objects.filter(
+            pengguna = user,
+            selesai =True,
+        )
+        .values_list("tanggal", flat=True)
+        .distinct()
+        .order_by("tanggal")
+    )
+    
+    tanggal_list = list(tanggal_selesai)
+    
+    if not tanggal_list:
+        return 0
+    
+    longest = 1
+    current = 1
+    
+    for i in range (1, len(tanggal_list)):
+        if tanggal_list[i] == tanggal_list[i-1] + timedelta(days=1):
+            current += 1
+            longest = max(longest, current)
+        else:
+            current = 1
+            
+    return longest
 
 def build_analytics_data(user, range_type):    
     cache_key = f"analytics_{user.id}_{range_type}"
@@ -40,19 +94,18 @@ def build_analytics_data(user, range_type):
 
     start_period, end_period = get_period_range(user, range_type)
 
-    semua = (
+    kegiatan_qs = (
         Kegiatan.objects
         .filter(
             pengguna=user,
-            tanggal__range=[start_period, end_period]
+            tanggal__range=(start_period, end_period)
         )
-        .select_related("kategori")
     )
-    selesai_qs = semua.filter(selesai=True)
+    selesai_qs = kegiatan_qs.filter(selesai=True)
 
-    stats = semua.aggregate(
-    total=Count("id"),
-    selesai=Count("id", filter=Q(selesai=True))
+    stats = kegiatan_qs.aggregate(
+        total=Count("id"),
+        selesai=Count("id", filter=Q(selesai=True))
     )
 
     total = stats["total"] or 0
@@ -60,7 +113,7 @@ def build_analytics_data(user, range_type):
     belum = total - selesai
     konsistensi = hitung_konsistensi(total, selesai)
 
-    kategori_stats = semua.values(
+    kategori_stats = kegiatan_qs.values(
         "kategori__nama"
     ).annotate(
         total=Count("id")
@@ -119,11 +172,13 @@ def build_analytics_data(user, range_type):
 
     if range_type == "all":
 
-        semua_list = semua.order_by("tanggal")
+        semua_list = kegiatan_qs.order_by("tanggal")
+        
+        first_item = semua_list.first()
 
-        if semua_list.exists():
+        if first_item:
 
-            start = semua_list.first().tanggal.replace(day=1)
+            start = first_item.tanggal.replace(day=1)
             end = date.today().replace(day=1)
 
             current = start
@@ -168,11 +223,17 @@ def build_analytics_data(user, range_type):
 
     y_max, step_size = hitung_scale(max_value)
     
-    complation_rate = get_completion_rate(user)
+    if total > 0:
+        completion_rate = round((selesai / total) * 100)
+    else:
+        completion_rate = 0
+        
+    streak = hitung_streak(user)
+    longest = hitung_longest_streak(user)
 
     result = {
         "range": range_type,
-        "kegiatan": semua,
+        "kegiatan": kegiatan_qs,
         "total": total,
         "selesai": selesai,
         "belum": belum,
@@ -188,19 +249,11 @@ def build_analytics_data(user, range_type):
         "all_values": all_values,
         "chart_step": step_size,
         "chart_max": y_max,
-        "completion_rate": complation_rate
+        "completion_rate": completion_rate,
+        "streak": streak,
+        "longest_streak": longest,
     }
     
     cache.set(cache_key, result, 300)
     
     return result
-
-def get_completion_rate(user):
-    total = Kegiatan.objects.filter(pengguna=user).count()
-    
-    if total == 0:
-        return 0
-    
-    completed = Kegiatan.objects.filter(pengguna=user, selesai=True).count()
-    
-    return round((completed / total) * 100)

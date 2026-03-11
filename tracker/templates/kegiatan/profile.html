@@ -1,201 +1,304 @@
-{% extends 'base.html' %}
-{% block isi %}
+{% extends 'base.html' %} {% block isi %}
 
-<div class="max-w-5xl mx-auto space-y-10">
+<div class="max-w-5xl mx-auto space-y-12">
+  <!-- ================= HEADER ================= -->
 
-    <!-- ================= HEADER ================= -->
-    <div>
-        <h2 class="text-2xl font-semibold tracking-tight">
-            Profile & Settings
-        </h2>
-        <p class="text-sm text-slate-500 mt-1">
-            Kelola akun, password, dan kategori aktivitas kamu
+  <div>
+    <h1 class="text-2xl font-semibold tracking-tight">Profil & Pengaturan</h1>
+
+    <p class="text-sm text-gray-500 mt-1">
+      Kelola informasi akun, keamanan password, dan kategori aktivitasmu.
+    </p>
+  </div>
+
+  <!-- ================= PROFILE CARD ================= -->
+
+  <div
+    class="bg-white border border-[#E5E7EB] rounded-2xl p-6 flex items-center justify-between"
+  >
+    <div class="flex items-center gap-4">
+      <img
+        class="w-14 h-14 rounded-full object-cover ring-2 ring-[#C6A969]/20"
+        src="https://ui-avatars.com/api/?name={{ request.user.username }}&background=F5F1E8&color=2F2F2F"
+        alt="avatar"
+      />
+
+      <div>
+        <p class="font-semibold text-lg">{{ request.user.username }}</p>
+
+        <p class="text-sm text-gray-500">
+          {{ request.user.email|default:"Email belum ditambahkan" }}
         </p>
+      </div>
     </div>
 
+    <span
+      class="text-xs bg-green-100 text-green-700 px-3 py-1 rounded-full font-medium"
+    >
+      Akun Aktif
+    </span>
+  </div>
 
-    <!-- ================= USER INFO ================= -->
-    <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-        <h3 class="font-semibold mb-4">Informasi Akun</h3>
+  <!-- ================= EDIT ACCOUNT ================= -->
 
-        <div class="grid sm:grid-cols-2 gap-4 text-sm">
+  <div class="bg-white border border-[#E5E7EB] rounded-2xl p-6">
+    <h3 class="font-semibold mb-6">Edit Informasi Akun</h3>
 
-            <div class="bg-slate-50 rounded-xl p-4">
-                <p class="text-slate-500 text-xs">Username</p>
-                <p class="font-semibold mt-1">
-                    {{ request.user.username }}
-                </p>
-            </div>
+    <form method="post" class="space-y-4">
+      {% csrf_token %}
 
-            <div class="bg-slate-50 rounded-xl p-4">
-                <p class="text-slate-500 text-xs">Email</p>
-                <p class="font-semibold mt-1">
-                    {{ request.user.email|default:"-" }}
-                </p>
-            </div>
+      <div class="space-y-3 text-sm">
+        <label>Nama Pengguna</label>
+        {{ form_user.username }}
 
-        </div>
-    </div>
+        <label>Email</label>
+        {{ form_user.email }}
+      </div>
 
+      <button
+        class="bg-[#C6A969] hover:opacity-90 text-white px-5 py-2.5 rounded-xl font-medium transition"
+      >
+        Simpan Perubahan
+      </button>
+    </form>
+  </div>
 
-    <!-- ================= EDIT AKUN ================= -->
-    <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+  <!-- ================= PASSWORD SECURITY ================= -->
 
-        <h3 class="font-semibold mb-5">Edit Akun</h3>
+  <div class="bg-white border border-[#E5E7EB] rounded-2xl p-6">
+    <h3 class="font-semibold mb-6">Keamanan Password</h3>
 
-        <form method="post" class="space-y-4">
-            {% csrf_token %}
+    <form method="post" class="space-y-5">
+      {% csrf_token %} {% if form_password.non_field_errors %}
 
-            <div class="space-y-3 text-sm">
-                {{ form_user.as_p }}
-            </div>
+      <div
+        class="bg-red-50 border border-red-200 text-red-600 p-3 rounded-lg text-sm"
+      >
+        {{ form_password.non_field_errors }}
+      </div>
 
-            <button class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl font-medium shadow-sm transition">
-                Simpan Perubahan
-            </button>
-        </form>
+      {% endif %}
 
-    </div>
+      <!-- OLD PASSWORD -->
 
+      <div>
+        <label class="text-sm font-medium block mb-1"> Password Lama </label>
 
-    <!-- ================= PASSWORD ================= -->
-    <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+        <div class="relative">
+          {{ form_password.old_password }}
 
-        <h3 class="font-semibold mb-5">Ganti Password</h3>
-
-        <form method="post" class="space-y-4">
-            {% csrf_token %}
-
-            {% if form_password.non_field_errors %}
-            <div class="bg-red-50 border border-red-200 text-red-600 p-3 rounded-lg text-sm">
-                {{ form_password.non_field_errors }}
-            </div>
-            {% endif %}
-
-            <div>
-                <label class="text-sm font-medium block mb-1">Password Lama</label>
-                {{ form_password.old_password }}
-                {% if form_password.old_password.errors %}
-                <p class="text-red-500 text-sm mt-1">
-                    {{ form_password.old_password.errors.0 }}
-                </p>
-                {% endif %}
-            </div>
-
-            <div>
-                <label class="text-sm font-medium block mb-1">Password Baru</label>
-                {{ form_password.new_password1 }}
-                {% if form_password.new_password1.errors %}
-                <p class="text-red-500 text-sm mt-1">
-                    {{ form_password.new_password1.errors.0 }}
-                </p>
-                {% endif %}
-            </div>
-
-            <ul class="text-xs text-slate-500 ml-4 list-disc">
-                <li>Password minimal 8 karakter</li>
-                <li>Tidak boleh terlalu mirip username/email</li>
-                <li>Tidak boleh hanya angka</li>
-                <li>Hindari password umum</li>
-            </ul>
-
-            <div>
-                <label class="text-sm font-medium block mb-1">Konfirmasi Password</label>
-                {{ form_password.new_password2 }}
-                {% if form_password.new_password2.errors %}
-                <p class="text-red-500 text-sm mt-1">
-                    {{ form_password.new_password2.errors.0 }}
-                </p>
-                {% endif %}
-            </div>
-
-            <button name="update_password"
-                    class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl font-medium shadow-sm transition">
-                Update Password
-            </button>
-
-        </form>
-
-    </div>
-
-
-    <!-- ================= KATEGORI ================= -->
-    <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-
-        <h3 class="font-semibold mb-5">Kategori Saya</h3>
-
-        <!-- ADD -->
-        <form method="post" action="{% url 'tambah_kategori' %}" class="flex gap-3 mb-6">
-            {% csrf_token %}
-            <input type="text" name="nama" placeholder="Kategori baru"
-                   class="flex-1 border border-slate-300 rounded-xl px-4 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-
-            <button class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 rounded-xl text-sm font-medium">
-                Tambah
-            </button>
-        </form>
-
-
-        <!-- LIST -->
-        <div class="space-y-2">
-
-        {% for k in kategori %}
-
-            <div id="kategori-{{ k.id }}" class="bg-slate-50 rounded-xl px-4 py-3 flex items-center justify-between scroll-mt-24">
-
-            {% if edit_id == k.id|stringformat:"s" %}
-
-                <form method="post" class="flex gap-2 w-full">
-                    {% csrf_token %}
-                    <input type="hidden" name="id" value="{{ k.id }}">
-                    <input type="text"
-                           name="nama"
-                           value="{{ k.nama }}"
-                           class="flex-1 border border-slate-300 rounded-lg px-3 py-1">
-
-                    <button name="edit_kategori"
-                            class="bg-indigo-600 text-white px-3 rounded text-sm">
-                        Simpan
-                    </button>
-
-                    <a href="{% url 'profile' %}"
-                       class="text-slate-500 text-sm flex items-center">
-                       Batal
-                    </a>
-                </form>
-
-            {% else %}
-
-                <span class="font-medium">
-                    {{ k.nama }}
-                </span>
-
-                <div class="flex gap-4 text-sm">
-                    <a href="?edit={{ k.id }}#kategori-{{ k.id }}" class="text-indigo-600 hover:underline">
-                        Edit
-                    </a>
-
-                    <a href="{% url 'hapus_kategori' k.id %}"
-                       onclick="return confirm('Hapus kategori ini?')"
-                       class="text-red-500 hover:underline">
-                       Hapus
-                    </a>
-                </div>
-
-            {% endif %}
-
-            </div>
-
-        {% empty %}
-            <p class="text-slate-400 text-sm">
-                Belum ada kategori.
-            </p>
-        {% endfor %}
-
+          <button
+            type="button"
+            class="togglePassword absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"
+          >
+            lihat
+          </button>
         </div>
 
-    </div>
+        {% if form_password.old_password.errors %}
 
+        <p class="text-red-500 text-sm mt-1">
+          {{ form_password.old_password.errors.0 }}
+        </p>
+        {% endif %}
+      </div>
+
+      <!-- NEW PASSWORD -->
+
+      <div>
+        <label class="text-sm font-medium block mb-1"> Password Baru </label>
+
+        <div class="relative">
+          {{ form_password.new_password1 }}
+
+          <button
+            type="button"
+            class="togglePassword absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"
+          >
+            lihat
+          </button>
+        </div>
+
+        {% if form_password.new_password1.errors %}
+
+        <p class="text-red-500 text-sm mt-1">
+          {{ form_password.new_password1.errors.0 }}
+        </p>
+        {% endif %}
+      </div>
+
+      <ul class="text-xs text-gray-500 ml-4 list-disc">
+        <li>Password minimal 8 karakter</li>
+        <li>Tidak boleh terlalu mirip username atau email</li>
+        <li>Tidak boleh hanya angka</li>
+        <li>Hindari password yang umum</li>
+      </ul>
+
+      <!-- CONFIRM PASSWORD -->
+
+      <div>
+        <label class="text-sm font-medium block mb-1">
+          Konfirmasi Password Baru
+        </label>
+
+        <div class="relative">
+          {{ form_password.new_password2 }}
+
+          <button
+            type="button"
+            class="togglePassword absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"
+          >
+            lihat
+          </button>
+        </div>
+
+        {% if form_password.new_password2.errors %}
+
+        <p class="text-red-500 text-sm mt-1">
+          {{ form_password.new_password2.errors.0 }}
+        </p>
+        {% endif %}
+      </div>
+
+      <button
+        name="update_password"
+        class="bg-[#C6A969] hover:opacity-90 text-white px-5 py-2.5 rounded-xl font-medium transition"
+      >
+        Update Password
+      </button>
+    </form>
+  </div>
+
+  <!-- ================= CATEGORY MANAGEMENT ================= -->
+
+  <div class="bg-white border border-[#E5E7EB] rounded-2xl p-6">
+    <h3 class="font-semibold mb-6">Kategori Aktivitas</h3>
+
+    <!-- ADD CATEGORY -->
+
+    <form
+      method="post"
+      action="{% url 'tambah_kategori' %}"
+      class="flex gap-3 mb-6"
+    >
+      {% csrf_token %}
+
+      <input
+        type="text"
+        name="nama"
+        placeholder="Tambah kategori baru"
+        class="flex-1 border border-[#E5E7EB] rounded-xl px-4 py-2 focus:ring-2 focus:ring-[#C6A969]/30 outline-none"
+      />
+
+      <button
+        class="bg-[#C6A969] hover:opacity-90 text-white px-5 rounded-xl text-sm font-medium"
+      >
+        Tambah
+      </button>
+    </form>
+
+    <!-- CATEGORY LIST -->
+
+    <div class="space-y-2">
+      {% for k in kategori %}
+
+      <div
+        id="kategori-{{ k.id }}"
+        class="bg-gray-50 rounded-xl px-4 py-3 flex items-center justify-between"
+      >
+        {% if edit_id == k.id|stringformat:"s" %}
+
+        <form method="post" class="flex gap-2 w-full">
+          {% csrf_token %}
+
+          <input type="hidden" name="id" value="{{ k.id }}" />
+
+          <input
+            type="text"
+            name="nama"
+            value="{{ k.nama }}"
+            class="flex-1 border border-gray-300 rounded-lg px-3 py-1"
+          />
+
+          <button
+            name="edit_kategori"
+            class="bg-[#C6A969] text-white px-3 rounded text-sm"
+          >
+            Simpan
+          </button>
+
+          <a
+            href="{% url 'profile' %}"
+            class="text-gray-500 text-sm flex items-center"
+          >
+            Batal
+          </a>
+        </form>
+
+        {% else %}
+
+        <span class="font-medium"> {{ k.nama }} </span>
+
+        <div class="flex gap-4 text-sm">
+          <a
+            href="?edit={{ k.id }}#kategori-{{ k.id }}"
+            class="text-[#C6A969] hover:underline"
+          >
+            Edit
+          </a>
+
+          <a
+            href="{% url 'hapus_kategori' k.id %}"
+            class="text-red-500 hover:underline deleteKategori"
+          >
+            Hapus
+          </a>
+        </div>
+
+        {% endif %}
+      </div>
+
+      {% empty %}
+
+      <p class="text-gray-400 text-sm">Belum ada kategori aktivitas.</p>
+
+      {% endfor %}
+    </div>
+  </div>
 </div>
+
+{% endblock %} {% block extra_js %}
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    /* ================= PASSWORD TOGGLE ================= */
+
+    document.querySelectorAll(".togglePassword").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        const input = btn.parentElement.querySelector("input");
+
+        if (!input) return;
+
+        if (input.type === "password") {
+          input.type = "text";
+          btn.innerText = "sembunyi";
+        } else {
+          input.type = "password";
+          btn.innerText = "lihat";
+        }
+      });
+    });
+
+    /* ================= DELETE CONFIRM ================= */
+
+    document.querySelectorAll(".deleteKategori").forEach(function (link) {
+      link.addEventListener("click", function (e) {
+        if (!confirm("Yakin ingin menghapus kategori ini?")) {
+          e.preventDefault();
+        }
+      });
+    });
+  });
+</script>
 
 {% endblock %}

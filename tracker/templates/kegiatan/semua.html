@@ -1,226 +1,198 @@
-{% extends 'base.html' %}
-
-{% block isi %}
+{% extends 'base.html' %} {% block isi %}
 
 <!-- HEADER -->
 <div class="flex items-center justify-between mb-8">
-
-    <div>
-        <h1 class="text-2xl font-semibold tracking-tight">
-            Semua Kegiatan
-        </h1>
-        <p class="text-sm text-slate-500 mt-1">
-            Kelola semua aktivitas kamu di sini
-        </p>
-    </div>
-
+  <div>
+    <h1 class="text-2xl font-semibold tracking-tight">Semua Kegiatan</h1>
+    <p class="text-sm text-slate-500 mt-1">
+      Kelola semua aktivitas kamu di sini
+    </p>
+  </div>
 </div>
 
 <form method="get" class="mb-6">
-    <input type="hidden" name="filter" value="{{ filter }}">
-    <input
-        type="text"
-        id="searchInput"
-        name="q"
-        value="{{ search_query }}"
-        placeholder="Cari kegiatan..."
-        class="w-full md:w-80 px-4 py-2 border rounded-lg
-               focus:outline-none focus:ring-2 focus:ring-slate-400">
+  <input type="hidden" name="filter" value="{{ filter }}" />
+  <input
+    type="text"
+    id="searchInput"
+    name="q"
+    value="{{ search_query }}"
+    placeholder="Cari kegiatan..."
+    class="w-full md:w-80 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-400"
+  />
 </form>
 
 <!-- FILTER -->
 <div class="flex flex-wrap gap-2 mb-6 text-sm">
+  <a
+    href="{% url 'semua_kegiatan' %}?q={{ search_query }}"
+    class="px-4 py-2 rounded-lg border border-slate-300 hover:bg-slate-100"
+  >
+    Semua
+  </a>
 
-    <a href="{% url 'semua_kegiatan' %}?q={{ search_query }}"
-       class="px-4 py-2 rounded-lg border border-slate-300 hover:bg-slate-100">
-        Semua
-    </a>
+  <a
+    href="?filter=today&q={{ search_query }}"
+    class="px-4 py-2 rounded-lg border border-slate-300 hover:bg-slate-100"
+  >
+    Hari ini
+  </a>
 
-    <a href="?filter=today&q={{ search_query }}"
-       class="px-4 py-2 rounded-lg border border-slate-300 hover:bg-slate-100">
-        Hari ini
-    </a>
+  <a
+    href="?filter=week&q={{ search_query }}"
+    class="px-4 py-2 rounded-lg border border-slate-300 hover:bg-slate-100"
+  >
+    Minggu ini
+  </a>
 
-    <a href="?filter=week&q={{ search_query }}"
-       class="px-4 py-2 rounded-lg border border-slate-300 hover:bg-slate-100">
-        Minggu ini
-    </a>
+  <a
+    href="?filter=done&q={{ search_query }}"
+    class="px-4 py-2 rounded-lg border border-slate-300 hover:bg-slate-100"
+  >
+    Selesai
+  </a>
 
-    <a href="?filter=done&q={{ search_query }}"
-       class="px-4 py-2 rounded-lg border border-slate-300 hover:bg-slate-100">
-        Selesai
-    </a>
-
-    <a href="?filter=pending&q={{ search_query }}"
-       class="px-4 py-2 rounded-lg border border-slate-300 hover:bg-slate-100">
-        Belum
-    </a>
-
+  <a
+    href="?filter=pending&q={{ search_query }}"
+    class="px-4 py-2 rounded-lg border border-slate-300 hover:bg-slate-100"
+  >
+    Belum
+  </a>
 </div>
-
 
 <!-- LIST KEGIATAN -->
 <div class="space-y-3">
+  {% for k in page_obj %}
 
-{% for k in page_obj %}
-
-<div class="bg-white border border-slate-200 rounded-xl p-5 
-            flex items-center justify-between
-            hover:shadow-sm transition">
-
+  <div
+    class="bg-white border border-slate-200 rounded-xl p-5 flex items-center justify-between hover:shadow-sm transition"
+  >
     <!-- LEFT -->
     <div>
+      <!-- JUDUL -->
+      <p class="font-semibold text-lg">{{ k.judul }}</p>
 
-        <!-- JUDUL -->
-        <p class="font-semibold text-lg">
-            {{ k.judul }}
-        </p>
+      <!-- TANGGAL -->
+      <p class="text-sm text-slate-400 mt-1">
+        {{ k.tanggal|date:"d M Y" }} • {{ k.waktu|time:"H:i" }}
+      </p>
 
-        <!-- TANGGAL -->
-        <p class="text-sm text-slate-400 mt-1">
-            {{ k.tanggal|date:"d M Y" }} • {{ k.waktu|time:"H:i" }}
-        </p>
+      <!-- BADGE ROW -->
+      <div class="flex items-center gap-2 mt-3 text-sm">
+        <!-- BADGE KATEGORI -->
+        {% with kategori=k.kategori|lower %}
+        <span
+          class="text-[11px] font-semibold px-2.5 py-1 rounded-full uppercase tracking-tight {% if 'work' in kategori %} bg-blue-100 text-blue-600 {% elif 'study' in kategori or 'design' in kategori %} bg-purple-100 text-purple-600 {% elif 'health' in kategori or 'gym' in kategori %} bg-emerald-100 text-emerald-600 {% elif 'learning' in kategori or 'read' in kategori %} bg-orange-100 text-orange-600 {% elif 'admin' in kategori %} bg-slate-200 text-slate-600 {% else %} bg-slate-100 text-slate-500 {% endif %}"
+        >
+          {{ k.kategori }}
+        </span>
+        {% endwith %}
 
-        <!-- BADGE ROW -->
-        <div class="flex items-center gap-2 mt-3 text-sm">
-
-            <!-- BADGE KATEGORI -->
-            {% with kategori=k.kategori|lower %}
-            <span class="text-[11px] font-semibold px-2.5 py-1 rounded-full uppercase tracking-tight
-
-            {% if 'work' in kategori %}
-                bg-blue-100 text-blue-600
-
-            {% elif 'study' in kategori or 'design' in kategori %}
-                bg-purple-100 text-purple-600
-
-            {% elif 'health' in kategori or 'gym' in kategori %}
-                bg-emerald-100 text-emerald-600
-
-            {% elif 'learning' in kategori or 'read' in kategori %}
-                bg-orange-100 text-orange-600
-
-            {% elif 'admin' in kategori %}
-                bg-slate-200 text-slate-600
-
-            {% else %}
-                bg-slate-100 text-slate-500
-
-            {% endif %}
-            ">
-                {{ k.kategori }}
-            </span>
-            {% endwith %}
-
-            <!-- BADGE STATUS -->
-            {% if k.selesai %}
-                <span class="text-[11px] font-semibold px-2.5 py-1 rounded-full
-                             bg-green-100 text-green-600">
-                    ✔ Selesai
-                </span>
-            {% else %}
-                <span class="text-[11px] font-semibold px-2.5 py-1 rounded-full
-                             bg-amber-100 text-amber-600">
-                    ⏳ Belum
-                </span>
-            {% endif %}
-
-        </div>
-
+        <!-- BADGE STATUS -->
+        {% if k.selesai %}
+        <span
+          class="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-green-100 text-green-600"
+        >
+          ✔ Selesai
+        </span>
+        {% else %}
+        <span
+          class="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-amber-100 text-amber-600"
+        >
+          ⏳ Belum
+        </span>
+        {% endif %}
+      </div>
     </div>
-
 
     <!-- RIGHT ACTIONS -->
     <div class="flex items-center gap-2 text-sm">
+      <!-- EDIT -->
+      <a
+        href="{% url 'edit_kegiatan' k.id %}"
+        class="px-3 py-2 rounded-lg border border-blue-300 text-blue-600 hover:bg-blue-50 transition"
+      >
+        Edit
+      </a>
 
-        <!-- EDIT -->
-        <a href="{% url 'edit_kegiatan' k.id %}"
-           class="px-3 py-2 rounded-lg border border-blue-300
-                  text-blue-600 hover:bg-blue-50 transition">
-            Edit
-        </a>
-
-        <form method="POST" action="{% url 'hapus_kegiatan' k.id %}" class="inline" onsubmit="return confirm('Yakin ingin menghapus kegiatan ini?')">
-            {% csrf_token %}
-            <button type="submit" class="px-3 py-2 rounded-lg border border-red-300 text-red-600 hover:bg-red-50 transition">
-                Hapus
-            </button>
-        </form>
-
+      <form
+        method="POST"
+        action="{% url 'hapus_kegiatan' k.id %}"
+        class="inline"
+        onsubmit="return confirm('Yakin ingin menghapus kegiatan ini?');"
+      >
+        {% csrf_token %}
+        <button
+          type="submit"
+          class="px-3 py-2 rounded-lg border border-red-300 text-red-600 hover:bg-red-50 transition"
+        >
+          Hapus
+        </button>
+      </form>
     </div>
+  </div>
 
-</div>
+  {% empty %}
 
-{% empty %}
+  <div class="text-center py-12 text-slate-400">Belum ada kegiatan.</div>
 
-<div class="text-center py-12 text-slate-400">
-    Belum ada kegiatan.
-</div>
-
-{% endfor %}
-
+  {% endfor %}
 </div>
 
 <!-- PAGINATION -->
 {% if page_obj.paginator.num_pages > 1 %}
 
 <div class="flex justify-center items-center gap-2 mt-8 text-sm">
+  <!-- Previous -->
+  {% if page_obj.has_previous %}
+  <a
+    href="?page={{ page_obj.previous_page_number }}&filter={{ filter }}&q={{ search_query }}"
+    class="px-3 py-1 border rounded-lg hover:bg-slate-100"
+  >
+    ← Prev
+  </a>
+  {% endif %}
 
-    <!-- Previous -->
-    {% if page_obj.has_previous %}
-        <a href="?page={{ page_obj.previous_page_number }}&filter={{ filter }}&q={{ search_query }}"
-           class="px-3 py-1 border rounded-lg hover:bg-slate-100">
-            ← Prev
-        </a>
-    {% endif %}
+  <!-- Page Numbers -->
+  {% for num in page_obj.paginator.page_range %} {% if num == page_obj.number %}
+  <span class="px-3 py-1 bg-slate-900 text-white rounded-lg"> {{ num }} </span>
+  {% else %}
+  <a
+    href="?page={{ num }}&filter={{ filter }}&q={{ search_query }}"
+    class="px-3 py-1 border rounded-lg hover:bg-slate-100"
+  >
+    {{ num }}
+  </a>
+  {% endif %} {% endfor %}
 
-    <!-- Page Numbers -->
-    {% for num in page_obj.paginator.page_range %}
-
-        {% if num == page_obj.number %}
-            <span class="px-3 py-1 bg-slate-900 text-white rounded-lg">
-                {{ num }}
-            </span>
-        {% else %}
-            <a href="?page={{ num }}&filter={{ filter }}&q={{ search_query }}"
-               class="px-3 py-1 border rounded-lg hover:bg-slate-100">
-                {{ num }}
-            </a>
-        {% endif %}
-
-    {% endfor %}
-
-    <!-- Next -->
-    {% if page_obj.has_next %}
-        <a href="?page={{ page_obj.next_page_number }}&filter={{ filter }}&q={{ search_query }}"
-           class="px-3 py-1 border rounded-lg hover:bg-slate-100">
-            Next →
-        </a>
-    {% endif %}
-
+  <!-- Next -->
+  {% if page_obj.has_next %}
+  <a
+    href="?page={{ page_obj.next_page_number }}&filter={{ filter }}&q={{ search_query }}"
+    class="px-3 py-1 border rounded-lg hover:bg-slate-100"
+  >
+    Next →
+  </a>
+  {% endif %}
 </div>
 
 {% endif %}
 
 <script>
-document.addEventListener("DOMContentLoaded", function(){
+  document.addEventListener("DOMContentLoaded", function () {
+    let searchTimer;
+    const input = document.getElementById("searchInput");
 
-let searchTimer;
-const input = document.getElementById("searchInput");
-
-if (input) {
-    input.addEventListener("input", function() {
-
+    if (input) {
+      input.addEventListener("input", function () {
         clearTimeout(searchTimer);
 
         searchTimer = setTimeout(() => {
-            input.form.submit();
+          input.form.submit();
         }, 500);
-
-    });
-}
-
-});
+      });
+    }
+  });
 </script>
 
 {% endblock %}

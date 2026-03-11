@@ -1,202 +1,297 @@
-{% extends 'base.html' %}
-{% block isi %}
+{% extends 'base.html' %} {% block isi %}
 
-<!-- HERO -->
-<div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10">
+<div class="max-w-6xl mx-auto space-y-12">
+  <!-- ================= HERO ================= -->
 
-  <div>
-    <h2 class="text-4xl font-black tracking-tight">
-      Selamat Datang {{ request.user.username }}
-    </h2>
+  <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
+    <div class="space-y-3">
+      <h1 class="text-3xl font-semibold tracking-tight">
+        Selamat Datang, {{ request.user.username }}
+      </h1>
 
-    <div class="flex items-center gap-4 mt-4">
+      <p class="text-sm text-gray-500">
+        Kelola aktivitas harianmu dan jaga konsistensi setiap hari.
+      </p>
 
-      <div class="flex items-center gap-3 bg-white border border-slate-200 px-4 py-2 rounded-xl shadow-sm">
-        <span class="material-symbols-outlined text-primary">
-          calendar_today
+      <div class="flex items-center gap-4 pt-2">
+        <!-- DATE SWITCH -->
+
+        <div
+          class="flex items-center gap-4 bg-white border border-[#E5E7EB] px-5 py-2.5 rounded-xl shadow-sm"
+        >
+          <span class="material-symbols-outlined text-[#C6A969]">
+            calendar_today
+          </span>
+
+          <a
+            href="?date={{ prev_date|date:'Y-m-d' }}"
+            class="text-gray-400 hover:text-black text-lg font-bold"
+          >
+            ‹
+          </a>
+
+          <p class="text-sm font-semibold min-w-[120px] text-center">
+            {{ hari_ini|date:"d M Y" }}
+          </p>
+
+          <a
+            href="?date={{ next_date|date:'Y-m-d' }}"
+            class="text-gray-400 hover:text-black text-lg font-bold"
+          >
+            ›
+          </a>
+        </div>
+
+        {% if hari_ini != today %}
+
+        <a
+          href="{% url 'dashboard' %}"
+          class="text-sm px-4 py-2 rounded-lg bg-[#C6A969]/10 text-[#C6A969] font-medium hover:bg-[#C6A969]/20 transition"
+        >
+          Hari Ini
+        </a>
+
+        {% endif %}
+      </div>
+    </div>
+
+    <button
+      onclick="openModal()"
+      class="flex items-center gap-2 bg-[#C6A969] text-white px-5 py-2.5 rounded-xl font-medium shadow-sm hover:shadow-md transition active:scale-95"
+    >
+      <span class="material-symbols-outlined text-[20px]"> add </span>
+
+      Tambah Kegiatan
+    </button>
+  </div>
+
+  <!-- ================= RINGKASAN ================= -->
+
+  <div
+    id="total-container"
+    hx-get="{% url 'dashboard_total_kegiatan' %}?date={{ hari_ini|date:'Y-m-d' }}"
+    hx-trigger="summaryUpdated from:body"
+    hx-target="#total-container"
+    hx-swap="innerHTML"
+  >
+    {% include "kegiatan/partials/total_kegiatan.html" %}
+  </div>
+
+  <!-- ================= KEGIATAN ================= -->
+
+  <div class="space-y-6">
+    <div class="flex items-center justify-between">
+      <h2 class="text-lg font-semibold">Kegiatan Hari Ini</h2>
+
+      <!-- FILTER -->
+
+      <div class="flex items-center gap-2 text-sm">
+        <a
+          href="?date={{ hari_ini|date:'Y-m-d' }}&filter=all"
+          class="px-3 py-1.5 rounded-lg transition {% if filter == 'all' %} bg-[#C6A969] text-white {% else %} bg-white border border-[#E5E7EB] hover:bg-gray-50 {% endif %}"
+        >
+          Semua
+        </a>
+
+        <a
+          href="?date={{ hari_ini|date:'Y-m-d' }}&filter=done"
+          class="px-3 py-1.5 rounded-lg transition {% if filter == 'done' %} bg-green-500 text-white {% else %} bg-white border border-[#E5E7EB] hover:bg-gray-50 {% endif %}"
+        >
+          Selesai
+        </a>
+
+        <a
+          href="?date={{ hari_ini|date:'Y-m-d' }}&filter=pending"
+          class="px-3 py-1.5 rounded-lg transition {% if filter == 'pending' %} bg-amber-500 text-white {% else %} bg-white border border-[#E5E7EB] hover:bg-gray-50 {% endif %}"
+        >
+          Ditunda
+        </a>
+      </div>
+    </div>
+
+    <!-- DAFTAR KEGIATAN -->
+
+    <div class="space-y-3">
+      {% for item in kegiatan %} {% include "kegiatan/partials/task_item.html"%}
+      {% empty %}
+
+      <div
+        class="bg-white border border-[#E5E7EB] rounded-xl p-10 text-center text-gray-400"
+      >
+        <span class="material-symbols-outlined text-4xl mb-2">
+          event_busy
         </span>
 
-        <a href="?date={{ prev_date|date:'Y-m-d' }}"
-           class="text-slate-400 hover:text-black transition text-lg font-bold">
-          ‹
-        </a>
-
-        <p class="text-base font-semibold min-w-[110px] text-center">
-          {{ hari_ini|date:"d M Y" }}
-        </p>
-
-        <a href="?date={{ next_date|date:'Y-m-d' }}"
-           class="text-slate-400 hover:text-black transition text-lg font-bold">
-          ›
-        </a>
+        <p class="text-sm">{{ empty_message }}</p>
       </div>
 
-      {% if hari_ini != today %}
-      <a href="{% url 'dashboard' %}"
-         class="text-sm px-4 py-2 rounded-lg bg-primary/10 text-primary font-semibold hover:bg-primary/20 transition">
-        Hari Ini
-      </a>
-      {% endif %}
+      {% endfor %}
 
-    </div>
-  </div>
+      <!-- PAGINATION -->
 
-  <button onclick="openModal()"
-          class="flex items-center gap-2 bg-primary text-white px-6 py-3 rounded-xl font-bold shadow-lg shadow-primary/20 transition-all active:scale-95">
-    <span class="material-symbols-outlined">add</span>
-    Add Activity
-  </button>
+      {% if page_obj.has_other_pages %}
 
-</div>
+      <div class="flex justify-center items-center gap-3 pt-6 text-sm">
+        {% if page_obj.has_previous %}
 
+        <a
+          href="?date={{ hari_ini|date:'Y-m-d' }}&filter={{ filter }}&page={{ page_obj.previous_page_number }}"
+          class="px-4 py-2 border border-[#E5E7EB] rounded-lg bg-white hover:bg-gray-50"
+        >
+          Sebelumnya
+        </a>
 
-<!-- ================= SUMMARY + PROGRESS (HTMX SAFE) ================= -->
+        {% endif %}
 
-<div id="total-container"
-     hx-get="{% url 'dashboard_total_kegiatan' %}?date={{ hari_ini|date:'Y-m-d' }}"
-     hx-trigger="summaryUpdated from:body"
-     hx-target="#total-container"
-     hx-swap="innerHTML">
+        <span class="text-gray-500">
+          Halaman {{ page_obj.number }} dari {{ page_obj.paginator.num_pages }}
+        </span>
 
-  {% include "kegiatan/partials/total_kegiatan.html" %}
+        {% if page_obj.has_next %}
 
-</div>
+        <a
+          href="?date={{ hari_ini|date:'Y-m-d' }}&filter={{ filter }}&page={{ page_obj.next_page_number }}"
+          class="px-4 py-2 border border-[#E5E7EB] rounded-lg bg-white hover:bg-gray-50"
+        >
+          Berikutnya
+        </a>
 
-
-<!-- ================= SCHEDULE ================= -->
-
-<h3 class="text-lg font-bold mb-4 mt-8">Jadwal Hari Ini</h3>
-
-<div class="flex gap-2 mb-4">
-
-  <a href="?date={{ hari_ini|date:'Y-m-d' }}&filter=all"
-     class="px-3 py-1 rounded-lg text-sm font-medium
-     {% if filter == 'all' %} bg-primary text-white {% else %} bg-slate-100 {% endif %}">
-    Semua
-  </a>
-
-  <a href="?date={{ hari_ini|date:'Y-m-d' }}&filter=done"
-     class="px-3 py-1 rounded-lg text-sm font-medium
-     {% if filter == 'done' %} bg-green-500 text-white {% else %} bg-slate-100 {% endif %}">
-    Selesai
-  </a>
-
-  <a href="?date={{ hari_ini|date:'Y-m-d' }}&filter=pending"
-     class="px-3 py-1 rounded-lg text-sm font-medium
-     {% if filter == 'pending' %} bg-amber-500 text-white {% else %} bg-slate-100 {% endif %}">
-    Ditunda
-  </a>
-
-</div>
-
-<div class="space-y-3">
-
-  {% for item in kegiatan %}
-    {% include "kegiatan/partials/task_item.html" with item=item %}
-  {% empty %}
-    <div class="text-center py-6 text-slate-400">
-      {% if filter == 'done' %}
-        Belum ada kegiatan yang selesai.
-      {% elif filter == 'pending' %}
-        Tidak ada kegiatan yang ditunda.
-      {% else %}
-        Belum ada kegiatan pada hari ini.
-      {% endif %}
-    </div>
-  {% endfor %}
-
-  {% if page_obj.has_other_pages %}
-  <div class="flex justify-center gap-2 mt-6">
-    {% if page_obj.has_previous %}
-      <a href="?date={{ hari_ini|date:'Y-m-d' }}&filter={{ filter }}&page={{ page_obj.previous_page_number }}"
-         class="px-3 py-1 bg-slate-100 rounded">
-         Prev
-      </a>
-    {% endif %}
-
-    <span class="px-3 py-1 text-sm">
-      Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
-    </span>
-
-    {% if page_obj.has_next %}
-      <a href="?date={{ hari_ini|date:'Y-m-d' }}&filter={{ filter }}&page={{ page_obj.next_page_number }}"
-         class="px-3 py-1 bg-slate-100 rounded">
-         Next
-      </a>
-    {% endif %}
-  </div>
-  {% endif %}
-
-</div>
-
-<!-- ================= QUICK ADD MODAL ================= -->
-
-<div id="quickModal"
-     class="fixed inset-0 bg-black/40 hidden items-center justify-center z-50">
-
-  <div class="bg-white w-full max-w-md rounded-2xl p-6 shadow-xl relative">
-
-    <button onclick="closeModal()"
-            class="absolute top-3 right-3 text-slate-400 hover:text-black">
-      ✕
-    </button>
-
-    <h3 class="text-lg font-bold mb-4">Tambah Kegiatan</h3>
-
-    <form method="POST" action="{% url 'tambah_kegiatan' %}">
-      {% csrf_token %}
-
-      <div class="space-y-4">
-
-        <input type="text" name="judul"
-               placeholder="Judul kegiatan"
-               required
-               class="w-full border rounded-lg px-3 py-2">
-
-        <input type="time" name="waktu"
-               required
-               class="w-full border rounded-lg px-3 py-2">
-
-        <select name="kategori"
-                class="w-full border rounded-lg px-3 py-2">
-
-          {% for k in request.user.kategori_set.all %}
-            <option value="{{ k.id }}">{{ k.nama }}</option>
-          {% endfor %}
-
-        </select>
-
-        <input type="hidden" name="tanggal"
-               value="{{ hari_ini|date:'Y-m-d' }}">
-
-        <button type="submit"
-                class="w-full bg-primary text-white py-2 rounded-lg font-semibold">
-          Simpan
-        </button>
-
+        {% endif %}
       </div>
 
-    </form>
-
+      {% endif %}
+    </div>
   </div>
 
+  <!-- ================= MODAL TAMBAH KEGIATAN ================= -->
+
+  <div
+    id="quickModal"
+    onclick="closeModal(event)"
+    class="fixed inset-0 bg-black/40 hidden items-center justify-center z-50 backdrop-blur-sm"
+  >
+    <div
+      id="modalCard"
+      onclick="event.stopPropagation()"
+      class="bg-white w-full max-w-md rounded-2xl p-7 shadow-2xl relative scale-95 opacity-0 transition-all duration-200"
+    >
+      <button
+        onclick="closeModal()"
+        class="absolute top-3 right-3 text-gray-400 hover:text-black"
+      >
+        ✕
+      </button>
+
+      <div class="flex items-center gap-2 mb-6">
+        <span class="material-symbols-outlined text-[#C6A969]">edit_note</span>
+        <h3 class="text-lg font-semibold">Tambah Kegiatan</h3>
+      </div>
+
+      <div class="border-b border-[#E5E7EB] mb-6"></div>
+
+      <form method="POST" action="{% url 'tambah_kegiatan' %}">
+        {% csrf_token %}
+
+        <div class="space-y-4">
+          <div>
+            <label class="text-sm text-gray-500">Judul Kegiatan</label>
+
+            <input
+              type="text"
+              name="judul"
+              placeholder="Contoh: Belajar Python"
+              required
+              autofocus
+              class="mt-1 w-full border border-[#E5E7EB] rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#C6A969]/30 outline-none"
+            />
+          </div>
+
+          <div>
+            <label class="text-sm text-gray-500">Waktu</label>
+            <input
+              type="time"
+              name="waktu"
+              required
+              class="w-full border border-[#E5E7EB] rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#C6A969]/30 outline-none"
+            />
+          </div>
+
+          <div>
+            <label class="text-sm text-gray-500">Kategori</label>
+
+            <div class="relative mt-1">
+              <select
+                name="kategori"
+                class="w-full appearance-none border border-[#E5E7EB] rounded-lg px-3 py-2 pr-10 focus:ring-2 focus:ring-[#C6A969]/30 outline-none bg-white"
+              >
+                {% for k in request.user.kategori_set.all %}
+                <option value="{{ k.id }}">{{ k.nama }}</option>
+                {% endfor %}
+              </select>
+
+              <!-- custom arrow -->
+              <span
+                class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
+              >
+                expand_more
+              </span>
+            </div>
+          </div>
+
+          <input
+            type="hidden"
+            name="tanggal"
+            value="{{ hari_ini|date:'Y-m-d' }}"
+          />
+
+          <button
+            type="submit"
+            class="w-full bg-[#C6A969] text-white py-2.5 rounded-lg font-medium hover:scale-[1.02] active:scale-[0.98] shadow-sm hover:shadow-md transition"
+          >
+            Simpan Kegiatan
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
 </div>
+
+{% endblock %} {% block extra_js %}
+
+<script>
+  function openModal() {
+    const modal = document.getElementById("quickModal");
+    const card = document.getElementById("modalCard");
+
+    modal.classList.remove("hidden");
+    modal.classList.add("flex");
+
+    setTimeout(() => {
+      card.classList.remove("scale-95", "opacity-0");
+      card.classList.add("scale-100", "opacity-100");
+    }, 10);
+  }
+
+  function closeModal(event) {
+    const modal = document.getElementById("quickModal");
+    const card = document.getElementById("modalCard");
+
+    if (event && event.target !== modal) return;
+
+    card.classList.remove("scale-100", "opacity-100");
+    card.classList.add("scale-95", "opacity-0");
+
+    setTimeout(() => {
+      modal.classList.remove("flex");
+      modal.classList.add("hidden");
+    }, 150);
+  }
+
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape") {
+      closeModal();
+    }
+  });
+</script>
 
 {% endblock %}
-
-{% block extra_js %}
-<script>
-function openModal() {
-  const modal = document.getElementById('quickModal');
-  if (modal) {
-    modal.classList.remove('hidden');
-    modal.classList.add('flex');
-  }
-}
-
-function closeModal() {
-  document.getElementById('quickModal').classList.remove('flex');
-  document.getElementById('quickModal').classList.add('hidden');
-}
-</script>
-{% endblock extra_js %}

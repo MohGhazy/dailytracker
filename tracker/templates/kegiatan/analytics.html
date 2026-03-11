@@ -1,289 +1,274 @@
-{% extends 'base.html' %}
-{% block isi %}
+{% extends 'base.html' %} {% block isi %}
 
-<div class="max-w-6xl mx-auto px-2">
+<div class="max-w-6xl mx-auto space-y-12">
+  <!-- ================= HEADER ================= -->
 
-<!-- ================= HEADER ================= -->
-<div class="flex items-end justify-between mb-10">
-
+  <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
     <div>
-        <h2 class="text-3xl font-semibold tracking-tight text-slate-800">
-            Analisis
-        </h2>
-        <p class="text-sm text-slate-500 mt-2">
-            Analisis progres dan konsistensimu secara real-time
-        </p>
+      <h1 class="text-2xl font-semibold tracking-tight">Analisis Aktivitas</h1>
+
+      <p class="text-sm text-gray-500 mt-1">
+        Lihat perkembangan produktivitas dan konsistensimu.
+      </p>
     </div>
+  </div>
 
-</div>
+  <!-- ================= RANGE FILTER ================= -->
 
-
-<!-- ================= TAB NAV ================= -->
-<div class="flex gap-2 mb-8 bg-slate-100 p-1 rounded-xl w-fit">
-
-    <a href="?range=week"
-       class="px-4 py-2 rounded-lg text-sm font-medium transition
-       {% if range == 'week' %}
-           bg-white shadow-sm text-slate-800
-       {% else %}
-           text-slate-500 hover:text-slate-700
-       {% endif %}">
-       Mingguan
+  <div class="flex gap-2 bg-gray-100 p-1 rounded-xl w-fit">
+    <a
+      href="?range=week"
+      class="px-4 py-2 rounded-lg text-sm font-medium transition {% if range == 'week' %} bg-white shadow text-gray-800 {% else %} text-gray-500 hover:text-gray-700 {% endif %}"
+    >
+      Mingguan
     </a>
 
-    <a href="?range=month"
-       class="px-4 py-2 rounded-lg text-sm font-medium transition
-       {% if range == 'month' %}
-           bg-white shadow-sm text-slate-800
-       {% else %}
-           text-slate-500 hover:text-slate-700
-       {% endif %}">
-       Bulanan
+    <a
+      href="?range=month"
+      class="px-4 py-2 rounded-lg text-sm font-medium transition {% if range == 'month' %} bg-white shadow text-gray-800 {% else %} text-gray-500 hover:text-gray-700 {% endif %}"
+    >
+      Bulanan
     </a>
 
-    <a href="?range=all"
-       class="px-4 py-2 rounded-lg text-sm font-medium transition
-       {% if range == 'all' %}
-           bg-white shadow-sm text-slate-800
-       {% else %}
-           text-slate-500 hover:text-slate-700
-       {% endif %}">
-       Semua
+    <a
+      href="?range=all"
+      class="px-4 py-2 rounded-lg text-sm font-medium transition {% if range == 'all' %} bg-white shadow text-gray-800 {% else %} text-gray-500 hover:text-gray-700 {% endif %}"
+    >
+      Semua
     </a>
+  </div>
 
-</div>
+  <!-- ================= PERIOD ================= -->
 
-
-<!-- ================= PERIOD LABEL ================= -->
-<p class="text-sm text-slate-500 mb-10 flex items-center gap-2">
+  <p class="text-sm text-gray-500 flex items-center gap-2">
     <span class="material-symbols-outlined text-base">calendar_today</span>
     {{ start_period|date:"d M Y" }} — {{ end_period|date:"d M Y" }}
-</p>
+  </p>
 
+  <!-- ================= STATS ================= -->
 
-<!-- ================= STAT GRID ================= -->
-<div class="grid md:grid-cols-4 gap-5 mb-12">
-
-    <div class="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
-        <p class="text-xs uppercase tracking-wider text-slate-400 mb-2">Total Tasks</p>
-        <p class="text-3xl font-semibold">{{ total }}</p>
+  <div class="grid md:grid-cols-4 gap-5">
+    <div class="bg-white border border-[#E5E7EB] rounded-2xl p-6">
+      <p class="text-xs uppercase tracking-wider text-gray-400 mb-2">
+        Total Tugas
+      </p>
+      <p class="text-3xl font-semibold">{{ total }}</p>
     </div>
 
-    <div class="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
-        <p class="text-xs uppercase tracking-wider text-slate-400 mb-2">Completed</p>
-        <p class="text-3xl font-semibold text-green-600">{{ selesai }}</p>
+    <div class="bg-white border border-[#E5E7EB] rounded-2xl p-6">
+      <p class="text-xs uppercase tracking-wider text-gray-400 mb-2">Selesai</p>
+      <p class="text-3xl font-semibold text-green-600">{{ selesai }}</p>
     </div>
 
-    <div class="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
-        <p class="text-xs uppercase tracking-wider text-slate-400 mb-2">Pending</p>
-        <p class="text-3xl font-semibold text-amber-500">{{ belum }}</p>
+    <div class="bg-white border border-[#E5E7EB] rounded-2xl p-6">
+      <p class="text-xs uppercase tracking-wider text-gray-400 mb-2">Belum</p>
+      <p class="text-3xl font-semibold text-amber-500">{{ belum }}</p>
     </div>
 
-    <div class="bg-primary/5 border border-primary/20 rounded-3xl p-6 shadow-sm">
-        <p class="text-xs uppercase tracking-wider text-slate-500 mb-2">Consistency</p>
-        <p class="text-3xl font-semibold text-primary">{{ konsistensi }}%</p>
+    <div class="bg-[#C6A969]/10 border border-[#C6A969]/20 rounded-2xl p-6">
+      <p class="text-xs uppercase tracking-wider text-gray-500 mb-2">
+        Konsistensi
+      </p>
+      <p class="text-3xl font-semibold text-[#C6A969]">{{ konsistensi }}%</p>
+    </div>
+  </div>
+
+  <!-- ================= STREAK ================= -->
+
+  <div class="grid md:grid-cols-2 gap-5">
+    <div class="bg-white border border-[#E5E7EB] rounded-2xl p-6">
+      <p class="text-sm text-gray-500">🔥 Streak Saat Ini</p>
+
+      <h2 class="text-3xl font-bold mt-2">{{ streak }} hari</h2>
+
+      <p class="text-sm text-gray-400 mt-2">
+        Jumlah hari berturut-turut kamu menyelesaikan tugas.
+      </p>
     </div>
 
-</div>
+    <div class="bg-white border border-[#E5E7EB] rounded-2xl p-6">
+      <p class="text-sm text-gray-500">🏆 Streak Terpanjang</p>
 
-<div class="bg-white p-6 rounded-xl border border-slate-200 mb-5">
+      <h2 class="text-3xl font-bold mt-2">{{ longest_streak }} hari</h2>
 
-    <p class="text-sm text-slate-500">
-        Completion Rate
+      <p class="text-sm text-gray-400 mt-2">
+        Rekor konsistensi terbaik yang pernah kamu capai.
+      </p>
+    </div>
+  </div>
+
+  <!-- ================= COMPLETION ================= -->
+
+  <div class="bg-white border border-[#E5E7EB] rounded-2xl p-6">
+    <p class="text-sm text-gray-500">
+      {{ selesai }} dari {{ total }} tugas berhasil diselesaikan
     </p>
 
-    <h2 class="text-3xl font-bold mt-2">
-        {{ completion_rate }}%
-    </h2>
+    <h2 class="text-3xl font-bold mt-2">{{ completion_rate }}%</h2>
 
-</div>
+    <p class="text-sm text-gray-400 mt-1">
+      Tingkat penyelesaian tugas pada periode ini.
+    </p>
+  </div>
 
-<!-- ================= CHART ================= -->
-<div class="bg-white border border-slate-200 rounded-3xl p-7 shadow-sm mb-12">
+  <!-- ================= CHART ================= -->
 
-    <h3 class="font-semibold mb-5 text-slate-800">
-        {% if range == 'week' %}
-            Weekly Productivity
-        {% elif range == 'month' %}
-            Monthly Productivity
-        {% else %}
-            Productivity Over Time
-        {% endif %}
+  <div class="bg-white border border-[#E5E7EB] rounded-2xl p-7">
+    <h3 class="font-semibold mb-5">
+      {% if range == 'week' %} Produktivitas Mingguan {% elif range == 'month'
+      %} Produktivitas Bulanan {% else %} Produktivitas Keseluruhan {% endif %}
     </h3>
 
-    {% if range == 'week' or range == 'month' or range == 'all' %}
-
-    <div class="relative w-full h-64 md:h-72 lg:h-80">
-        <canvas id="analyticsChart" class="!w-full !h-full"></canvas>
+    <div class="relative w-full h-72">
+      <canvas id="analyticsChart"></canvas>
     </div>
+  </div>
 
-    {% else %}
-        <div class="h-40 flex items-center justify-center text-slate-400 text-sm">
-            Chart only available in Weekly view
-        </div>
-    {% endif %}
+  <!-- ================= CATEGORY ================= -->
 
-</div>
-
-<!-- ================= CATEGORY ================= -->
-<div class="bg-white border border-slate-200 rounded-3xl p-7 shadow-sm mb-12">
-
-    <h3 class="font-semibold mb-5 text-slate-800">
-        Top Categories
-    </h3>
+  <div class="bg-white border border-[#E5E7EB] rounded-2xl p-7">
+    <h3 class="font-semibold mb-5">Kategori Terpopuler</h3>
 
     <div class="space-y-3">
-        {% for cat in kategori_stats %}
-        <div class="flex items-center justify-between">
-            <span class="text-sm font-medium truncate max-w-[60%]">
-                {{ cat.kategori__nama }}
-            </span>
-            <span class="text-sm text-slate-500">
-                {{ cat.total }} tasks
-            </span>
-        </div>
-        {% empty %}
-        <p class="text-slate-400 text-sm">No category data yet.</p>
-        {% endfor %}
+      {% for cat in kategori_stats %}
+
+      <div class="flex items-center justify-between text-sm">
+        <span class="font-medium"> {{ cat.kategori__nama }} </span>
+
+        <span class="text-gray-500"> {{ cat.total }} tugas </span>
+      </div>
+
+      {% empty %}
+
+      <p class="text-gray-400 text-sm">Tidak ada data kategori.</p>
+
+      {% endfor %}
     </div>
+  </div>
 
-</div>
+  <!-- ================= RECENT ACTIVITIES ================= -->
 
+  <div>
+    <h3 class="text-lg font-semibold mb-4">Kegiatan Terbaru</h3>
 
-<!-- ================= ACTIVITY ================= -->
-<h3 class="text-lg font-semibold mb-4 text-slate-800">
-    Activities in this period
-</h3>
+    <div class="space-y-3">
+      {% for k in kegiatan %}
 
-<div class="space-y-3">
+      <div
+        class="bg-white border border-[#E5E7EB] rounded-xl p-4 flex items-center justify-between"
+      >
+        <div>
+          <p class="font-medium">{{ k.judul }}</p>
 
-{% for k in kegiatan %}
-
-<div class="bg-white border border-slate-200 rounded-2xl p-4 
-            flex items-center justify-between
-            hover:shadow-md hover:border-slate-300
-            transition">
-
-    <div>
-        <p class="font-semibold text-slate-800">{{ k.judul }}</p>
-        <p class="text-sm text-slate-400 mt-1">
+          <p class="text-sm text-gray-400 mt-1">
             {{ k.tanggal|date:"d M Y" }} • {{ k.waktu|time:"H:i" }}
-        </p>
+          </p>
+        </div>
+
+        {% if k.selesai %}
+        <span
+          class="text-xs font-semibold px-3 py-1 rounded-full bg-green-100 text-green-700"
+        >
+          ✔ Selesai
+        </span>
+        {% else %}
+        <span
+          class="text-xs font-semibold px-3 py-1 rounded-full bg-amber-100 text-amber-700"
+        >
+          ⏳ Belum
+        </span>
+        {% endif %}
+      </div>
+
+      {% empty %}
+
+      <div class="text-center py-14 text-gray-400">
+        Belum ada kegiatan dalam periode ini.
+      </div>
+
+      {% endfor %}
     </div>
-
-    {% if k.selesai %}
-        <span class="text-[11px] font-semibold px-3 py-1 rounded-full
-                     bg-green-100 text-green-700">
-            ✔ Done
-        </span>
-    {% else %}
-        <span class="text-[11px] font-semibold px-3 py-1 rounded-full
-                     bg-amber-100 text-amber-700">
-            ⏳ Pending
-        </span>
-    {% endif %}
-
+  </div>
 </div>
 
-{% empty %}
-<div class="text-center py-14 text-slate-400">
-    No activities in this period.
-</div>
-{% endfor %}
-
-</div>
-
-</div>
-
-{% endblock %}
-
-{% block extra_js %}
-
-{{ week_labels|json_script:"week-labels" }}
-{{ week_values|json_script:"week-values" }}
-{{ month_labels|json_script:"month-labels" }}
-{{ month_values|json_script:"month-values" }}
-{{ all_labels|json_script:"all-labels" }}
-{{ all_values|json_script:"all-values" }}
+{% endblock %} {% block extra_js %} {{ week_labels|json_script:"week-labels" }}
+{{ week_values|json_script:"week-values" }} {{
+month_labels|json_script:"month-labels" }} {{
+month_values|json_script:"month-values" }} {{
+all_labels|json_script:"all-labels" }} {{ all_values|json_script:"all-values" }}
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 {% if range == 'week' or range == 'month' or range == 'all' %}
 <script>
-
-(function() {
-
+  (function () {
     const range = "{{ range }}";
-    const chartEl = document.getElementById('analyticsChart');
+    const chartEl = document.getElementById("analyticsChart");
 
     if (!chartEl) return;
 
     function getJSON(id) {
-        const el = document.getElementById(id);
-        if (!el) return [];
-        try {
-            return JSON.parse(el.textContent);
-        } catch {
-            return [];
-        }
+      const el = document.getElementById(id);
+      if (!el) return [];
+      try {
+        return JSON.parse(el.textContent);
+      } catch {
+        return [];
+      }
     }
 
     let labels = [];
-    let data   = [];
+    let data = [];
 
     if (range === "week") {
-        labels = getJSON('week-labels');
-        data   = getJSON('week-values');
-    }
-    else if (range === "month") {
-        labels = getJSON('month-labels');
-        data   = getJSON('month-values');
-    }
-    else if (range === "all") {
-        labels = getJSON('all-labels');
-        data   = getJSON('all-values');
+      labels = getJSON("week-labels");
+      data = getJSON("week-values");
+    } else if (range === "month") {
+      labels = getJSON("month-labels");
+      data = getJSON("month-values");
+    } else if (range === "all") {
+      labels = getJSON("all-labels");
+      data = getJSON("all-values");
     }
 
     if (!labels.length) return;
 
-    const chartMax  = Number("{{ chart_max|default:20 }}");
+    const chartMax = Number("{{ chart_max|default:20 }}");
     const chartStep = Number("{{ chart_step|default:5 }}");
 
     new Chart(chartEl, {
-        type: 'bar',
-        data: {
-            labels: labels,
-            datasets: [{
-                data: data,
-                borderRadius: 8,
-                borderSkipped: false,
-                backgroundColor: '#2513ec'
-            }]
+      type: "bar",
+      data: {
+        labels: labels,
+        datasets: [
+          {
+            data: data,
+            borderRadius: 8,
+            borderSkipped: false,
+            backgroundColor: "#2513ec",
+          },
+        ],
+      },
+      options: {
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
         },
-        options: {
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { display: false }
+        scales: {
+          y: {
+            beginAtZero: true,
+            max: chartMax,
+            ticks: {
+              stepSize: chartStep,
             },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    max: chartMax,
-                    ticks: {
-                        stepSize: chartStep
-                    },
-                    grid: { color: '#f1f5f9' }
-                },
-                x: {
-                    grid: { display: false }
-                }
-            }
-        }
+            grid: { color: "#f1f5f9" },
+          },
+          x: {
+            grid: { display: false },
+          },
+        },
+      },
     });
-
-})();
-
+  })();
 </script>
-{% endif %}
-
-{% endblock %}
+{% endif %} {% endblock %}
