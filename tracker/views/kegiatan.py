@@ -22,7 +22,7 @@ def semua_kegiatan(request):
     paginator = Paginator(kegiatan, 5)
     page_obj = paginator.get_page(page_number)
     
-    return render(request, 'kegiatan/semua.html', {
+    return render(request, 'kegiatan/kegiatan.html', {
         'page_obj': page_obj,
         'paginator': paginator,
         'filter': filter_type,

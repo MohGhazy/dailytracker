@@ -3,7 +3,7 @@ from . import views
 
 urlpatterns = [
  path('dashboard/', views.dashboard, name='dashboard'),
- path("dashboard/total_kegiatan/", views.dashboard_total_kegiatan, name="dashboard_total_kegiatan"),
+ path('dashboard/total_kegiatan/', views.dashboard_total_kegiatan, name="dashboard_total_kegiatan"),
  path('kegiatan/', views.semua_kegiatan, name='semua_kegiatan'),
  path('tambah/', views.tambah_kegiatan, name='tambah_kegiatan'),
  path('edit/<int:id>/', views.edit_kegiatan, name='edit_kegiatan'),

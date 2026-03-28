@@ -207,6 +207,18 @@
           </div>
 
           <div>
+            <label class="text-sm text-gray-500">Tanggal</label>
+            <input
+              type="date"
+              name="tanggal"
+              value="{{ hari_ini|date:'Y-m-d' }}"
+              min="{{ today|date:'Y-m-d' }}"
+              required
+              class="w-full border border-[#E5E7EB] rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#C6A969]/30 outline-none"
+            />
+          </div>
+
+          <div>
             <label class="text-sm text-gray-500">Waktu</label>
             <input
               type="time"
